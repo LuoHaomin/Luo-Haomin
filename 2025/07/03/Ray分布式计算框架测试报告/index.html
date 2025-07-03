@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+	<!-- title -->
+	
+<title>
+    
+        Ray分布式计算框架测试报告&nbsp;&nbsp;✦&nbsp;
+    
+    luohaomin&#39;s blog
+</title>
+
+	<!-- keywords,description -->
+	
+
+<meta name="author" content="luohaomin" />
+
+<meta name="keywords" content="luohaomin,生活,记录" />
+
+<meta name="description" content="一、实验背景与目的在大数据与人工智能快速发展的当下，分布式计算框架成为高效处理海量数据与复杂计算任务的关键技术。Ray作为新兴的分布式计算框架，凭借其出色的灵活性与扩展性，在多个领域大放异彩。本次实验聚焦于Ray框架，旨在深入探究其性能表现，掌握部署技巧，并通过优化提升性能。
+大素数寻找与分解任务对计算资源要求极高，涉及大量复杂运算。选择该任务作为测试对象，可以充分利用Ray框架的分布式计算优势，" />
+
+	<!-- favicon -->
+	
+		<link rel="shortcut icon" href="/Luo-Haomin/favicon.ico">
+	
+
+	<!-- css, script -->
+	
+<link rel="stylesheet" href="https://unpkg.com/font-awesome@4.7.0/css/font-awesome.min.css">
+
+	
+<link rel="stylesheet" href="/Luo-Haomin/css/main.css">
+
+
+	
+<script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.58/darkreader.min.js"></script>
+
+	
+<script src="/Luo-Haomin/js/main.js"></script>
+
+
+	<!-- custom css and js -->
+	
+
+
+
+
+
+	<!-- search -->
+	<script async>
+	window.searchEngine = "https://www.google.com/search?q=" ?? "https://www.google.com/search?q=";
+	window.homeHost = "http://luohaomin.github.io/Luo-Haomin" ?? window.location.host;
+</script>
+
+	<!-- statistics -->
+	
+	<script async reload src="https://cn.vercount.one/js"></script>
+
+
+	<!-- analysis -->
+	
+
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+	<header id="header">
+	<a id="title" href="/Luo-Haomin/" class="logo">
+		<img id="logo" src="/Luo-Haomin/favicon-white.ico" alt="logo"/>
+		luohaomin's blog
+	</a>
+
+	<ul id="menu">
+		
+			<li class="menu-item">
+				<a href="/Luo-Haomin/about" class="menu-item-link">关于</a>
+			</li>
+		
+		
+		
+		
+			<li class="menu-item">
+				<a href="https://github.com/LuoHaomin/" class="menu-item-link item-icon" target="_blank">
+					<i class="fa fa-github fa-2x"></i>
+				</a>
+			</li>
+		
+		
+			<li class="menu-item dark-mode">
+				<a href="#" class="menu-item-link item-icon">
+					<i class="fa fa-moon-o fa-2x"></i>
+				</a>
+			</li>
+
+			<script async>
+				const localModel = localStorage.getItem("darkModel");
+				const darkModel = !localModel ? 0 : localModel;
+
+				const darkModeIcon = document.querySelector("#menu .dark-mode i");
+
+				if (darkModel == 1) {
+					darkModeIcon.classList.replace("fa-moon-o", "fa-sun-o");
+					DarkReader.enable({
+						brightness: 100,
+						contrast: 90,
+						sepia: 10,
+					});
+				}
+
+				darkModeIcon.addEventListener("click", () => {
+					const isMoon = darkModeIcon.classList.contains("fa-moon-o");
+					darkModeIcon.classList.toggle("fa-moon-o", !isMoon);
+					darkModeIcon.classList.toggle("fa-sun-o", isMoon);
+					localStorage.setItem("darkModel", isMoon ? 1 : 0);
+					isMoon ? DarkReader.enable({ brightness: 100, contrast: 90, sepia: 10 }) : DarkReader.disable();
+				});
+			</script>
+		
+	</ul>
+</header>
+
+<script async>
+	let startHeight = 0;
+	window.addEventListener("scroll", () => {
+		const { scrollY: endHeight } = window;
+		const distance = endHeight - startHeight;
+		startHeight = endHeight;
+		document.querySelector("#header").style.display = distance > 0 && endHeight > 50 ? "none" : "";
+	});
+</script>
+	<div id="sidebar">
+	<button id="sidebar-toggle" class="toggle" ><i class="fa fa-arrow-right " aria-hidden="true"></i></button>
+	<div id="site-toc">
+		<input id="search-input" class="search-input" type="search" placeholder="按回车全站搜索">
+		<div id="tree">
+			
+			
+							<ul>
+								<li class="file">
+									<a href="/Luo-Haomin/2025/05/06/%E5%86%99%E5%9C%A8%E5%89%8D%E9%9D%A2/" title="/Luo-Haomin/2025/05/06/写在前面">
+									
+										写在前面
+									
+									</a>
+								</li>
+								<div class="article-toc" style="display: none;"></div>
+							</ul>
+			
+							<ul>
+								<li class="file">
+									<a href="/Luo-Haomin/2025/07/03/Hexo%E4%BD%BF%E7%94%A8%E9%80%9F%E6%9F%A5%E8%A1%A8/" title="/Luo-Haomin/2025/07/03/Hexo使用速查表">
+									
+										Hexo使用速查表
+									
+									</a>
+								</li>
+								<div class="article-toc" style="display: none;"></div>
+							</ul>
+			
+							<ul>
+								<li class="file active">
+									<a href="/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/" title="/Luo-Haomin/2025/07/03/Ray分布式计算框架测试报告">
+									
+										Ray分布式计算框架测试报告
+									
+									</a>
+								</li>
+								<div class="article-toc" style="display: none;"></div>
+							</ul>
+			
+		</div>
+	</div>
+</div>
+
+	<div id="content">
+		<h1 id="article-title">
+	Ray分布式计算框架测试报告
+</h1>
+
+<div class="article-meta">
+	<span> luohaomin </span>
+	<span> 2025-07-03 22:17:31 </span>
+	<div id="article-categories">
+		
+			<span>Categories：</span>
+			
+		
+		
+			<span>Tags：</span>
+			
+		
+	</div>
+</div>
+
+<div id="article-content">
+	<h2 id="一、实验背景与目的"><a href="#一、实验背景与目的" class="headerlink" title="一、实验背景与目的"></a>一、实验背景与目的</h2><p>在大数据与人工智能快速发展的当下，分布式计算框架成为高效处理海量数据与复杂计算任务的关键技术。Ray作为新兴的分布式计算框架，凭借其出色的灵活性与扩展性，在多个领域大放异彩。本次实验聚焦于Ray框架，旨在深入探究其性能表现，掌握部署技巧，并通过优化提升性能。</p>
+<p>大素数寻找与分解任务对计算资源要求极高，涉及大量复杂运算。选择该任务作为测试对象，可以充分利用Ray框架的分布式计算优势，实现任务的高效并行处理，从而显著提升计算效率。</p>
+<h2 id="二、可选性能指标"><a href="#二、可选性能指标" class="headerlink" title="二、可选性能指标"></a>二、可选性能指标</h2><h3 id="（一）核心性能指标"><a href="#（一）核心性能指标" class="headerlink" title="（一）核心性能指标"></a>（一）核心性能指标</h3><ol>
+<li><strong>任务延迟（Task Latency）</strong><ul>
+<li><strong>定义</strong>：单个Ray任务从提交到完成的时间（毫秒级）。</li>
+<li><strong>合理性</strong>：直接反映Ray任务调度的效率，尤其对实时推理场景（如LLM服务）至关重要。高延迟可能暴露任务分解或负载均衡问题。</li>
+</ul>
+</li>
+<li><strong>吞吐量（Throughput）</strong><ul>
+<li><strong>定义</strong>：单位时间内成功处理的任务数量（任务&#x2F;秒）。</li>
+<li><strong>合理性</strong>：衡量Ray分布式计算的并行能力，适用于批处理场景（如大规模方差计算）。低吞吐量可能提示任务粒度不合理或资源不足。</li>
+</ul>
+</li>
+</ol>
+<h3 id="（二）资源效率指标"><a href="#（二）资源效率指标" class="headerlink" title="（二）资源效率指标"></a>（二）资源效率指标</h3><ol>
+<li><strong>CPU&#x2F;GPU利用率</strong><ul>
+<li><strong>定义</strong>：计算节点中CPU&#x2F;GPU核心的忙闲比例（%）。</li>
+<li><strong>合理性</strong>：低利用率可能因任务粒度过小或线程竞争（如NumPy&#x2F;PyTorch多线程冲突），需结合任务调度策略优化。</li>
+</ul>
+</li>
+<li><strong>内存使用率（Memory Utilization）</strong><ul>
+<li><strong>定义</strong>：节点内存及Ray对象存储的占用情况（GB）。</li>
+<li><strong>合理性</strong>：大模型推理易出现内存泄漏或显存溢出，监控可预防OOM错误，并优化批处理大小。</li>
+</ul>
+</li>
+</ol>
+<h3 id="（三）系统级稳定性指标"><a href="#（三）系统级稳定性指标" class="headerlink" title="（三）系统级稳定性指标"></a>（三）系统级稳定性指标</h3><ol>
+<li><strong>错误率（Error Rate）</strong><ul>
+<li><strong>定义</strong>：任务失败或异常的比例（%）。</li>
+<li><strong>合理性</strong>：高错误率可能因节点通信故障或资源竞争，影响系统稳定性。</li>
+</ul>
+</li>
+<li><strong>队列长度（Queue Length）</strong><ul>
+<li><strong>定义</strong>：待处理任务的积压数量。</li>
+<li><strong>合理性</strong>：长队列暴露任务分配不均或资源瓶颈，需动态调整Actor数量或启用自动扩缩容。</li>
+</ul>
+</li>
+</ol>
+<h2 id="三、选定测试任务及测试指标"><a href="#三、选定测试任务及测试指标" class="headerlink" title="三、选定测试任务及测试指标"></a>三、选定测试任务及测试指标</h2><h3 id="（一）选定测试任务"><a href="#（一）选定测试任务" class="headerlink" title="（一）选定测试任务"></a>（一）选定测试任务</h3><p>选定的大素数寻找与分解任务，具有高度的计算密集型特点，涉及复杂的数学运算与大量的数据处理。在该任务中，需要寻找大素数并对其进行分解，这不仅考验单个节点的计算能力，更对分布式计算框架的任务分配与并行处理机制提出了严峻挑战。</p>
+<h3 id="（二）测试指标"><a href="#（二）测试指标" class="headerlink" title="（二）测试指标"></a>（二）测试指标</h3><ol>
+<li>吞吐量：每秒处理的素数数量，直接体现Ray框架在单位时间内完成任务的效率，反映其并行计算能力。</li>
+<li>资源（CPU&#x2F;Memory）利用率： CPU利用率衡量计算节点中CPU核心的忙碌程度，Memory利用率反映节点内存及Ray对象存储的占用状况。合理利用资源可以提升计算效率，过低或过高的利用率都可能影响任务执行效果。</li>
+<li>节点利用效率：“实际工作时间”除以“节点存活总时间”，衡量节点在任务执行中的实际贡献。高利用效率表明节点资源被充分利用，低利用效率可能提示任务分配不均或资源浪费。</li>
+</ol>
+<h2 id="四、环境配置"><a href="#四、环境配置" class="headerlink" title="四、环境配置"></a>四、环境配置</h2><h3 id="1-更新系统包"><a href="#1-更新系统包" class="headerlink" title="1. 更新系统包"></a>1. 更新系统包</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt update</span><br><span class="line"><span class="built_in">sudo</span> apt upgrade</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-安装依赖工具"><a href="#2-安装依赖工具" class="headerlink" title="2. 安装依赖工具"></a>2. 安装依赖工具</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install software-properties-common</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-添加Python版本源并安装"><a href="#3-添加Python版本源并安装" class="headerlink" title="3. 添加Python版本源并安装"></a>3. 添加Python版本源并安装</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> add-apt-repository ppa:deadsnakes/ppa</span><br><span class="line"><span class="built_in">sudo</span> apt install python3.12</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-设置默认Python版本"><a href="#4-设置默认Python版本" class="headerlink" title="4. 设置默认Python版本"></a>4. 设置默认Python版本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> update-alternatives --install /usr/bin/python python /usr/bin/python3.12 2</span><br><span class="line">python --version  <span class="comment"># 验证Python版本</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-安装Python虚拟环境工具"><a href="#5-安装Python虚拟环境工具" class="headerlink" title="5. 安装Python虚拟环境工具"></a>5. 安装Python虚拟环境工具</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install python3.12-venv</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-创建项目目录并初始化虚拟环境"><a href="#6-创建项目目录并初始化虚拟环境" class="headerlink" title="6. 创建项目目录并初始化虚拟环境"></a>6. 创建项目目录并初始化虚拟环境</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> raytest</span><br><span class="line"><span class="built_in">cd</span> raytest/</span><br><span class="line">python3 -m venv rayenv</span><br><span class="line"><span class="built_in">source</span> rayenv/bin/activate  <span class="comment"># 激活虚拟环境</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="7-升级pip并安装Ray"><a href="#7-升级pip并安装Ray" class="headerlink" title="7. 升级pip并安装Ray"></a>7. 升级pip并安装Ray</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pip install --upgrade pip</span><br><span class="line">pip install <span class="string">&quot;ray[default]&quot;</span>  <span class="comment"># 安装Ray框架</span></span><br><span class="line">pip install gmpy2  <span class="comment"># 安装数学计算库</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="8-退出虚拟环境"><a href="#8-退出虚拟环境" class="headerlink" title="8. 退出虚拟环境"></a>8. 退出虚拟环境</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">deactivate</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="五、单机版部署与性能测试"><a href="#五、单机版部署与性能测试" class="headerlink" title="五、单机版部署与性能测试"></a>五、单机版部署与性能测试</h2><h3 id="（一）部署过程"><a href="#（一）部署过程" class="headerlink" title="（一）部署过程"></a>（一）部署过程</h3><p>见上述的环境配置部分，单机版部署与配置过程与分布式部署类似，只需在单台机器上启动Ray服务即可。</p>
+<h3 id="（二）性能测试"><a href="#（二）性能测试" class="headerlink" title="（二）性能测试"></a>（二）性能测试</h3><ol>
+<li><p>吞吐量测试：设计测试用例，模拟大素数寻找与分解任务。记录单位时间内完成的任务数量，计算吞吐量。在测试过程中，观察不同任务规模下吞吐量的变化情况，分析Ray框架的任务调度机制对吞吐量的影响。</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ray.remote</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">find_prime</span>(<span class="params">bits</span>):</span><br><span class="line">    <span class="comment"># 素数生成逻辑</span></span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">primes = ray.get([find_prime.remote(<span class="number">1024</span>) <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>)])</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>资源利用率测试：使用系统监控工具或Ray自带的资源监控功能，实时监测CPU和内存的使用情况。在任务执行过程中，记录CPU利用率和内存利用率的变化曲线，分析资源利用的高峰期与低谷期。</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> psutil</span><br><span class="line"></span><br><span class="line">cpu_percent = psutil.cpu_percent(interval=<span class="number">1</span>)</span><br><span class="line">memory_percent = psutil.virtual_memory().percent</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>节点利用效率测试：计算每个节点的实际工作时间与存活总时间，评估节点在任务执行中的实际贡献。</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">node_uptime = ray.nodes()[<span class="number">0</span>][<span class="string">&#x27;uptime&#x27;</span>]  <span class="comment"># 获取节点存活时间</span></span><br><span class="line">node_work_time = ray.get_runtime_context().get_node_work_time()  <span class="comment"># 获取实际工作时间</span></span><br><span class="line">efficiency = node_work_time / node_uptime <span class="keyword">if</span> node_uptime &gt; <span class="number">0</span> <span class="keyword">else</span> <span class="number">0</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="（三）测试结果"><a href="#（三）测试结果" class="headerlink" title="（三）测试结果"></a>（三）测试结果</h3><p>在单机版测试中，我们修改单节点的Worker数量,测试得到以下数据。具体测试结果如下：</p>
+<p>CPU利用率随着Worker数量的增加而逐渐上升，但在Worker数量达到一定程度后，CPU利用率趋于平稳。</p>
+<!-- ![img](/lab4/img/cluster_size_1/avg_cpu_vs_total_workers.png) -->
+<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/cluster_size_1/avg_cpu_vs_total_workers.png" alt="img"></p>
+<p>内存使用量随着Worker数量的增加而逐渐上升。</p>
+<!-- ![img](/lab4/img/cluster_size_1/avg_memory_vs_total_workers.png) -->
+<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/cluster_size_1/avg_memory_vs_total_workers.png" alt="img"></p>
+<p>吞吐量随着Worker数量的增加而显著提升，表明Ray框架能够有效利用多核CPU进行并行计算。</p>
+<p>然而，由于我们使用的虚拟机CPU仅为2核，吞吐量在Worker数量达到2时就达到了峰值，之后由于资源竞争与调度开销的增加，吞吐量略有下降。</p>
+<!-- ![img](/lab4/img/cluster_size_1/throughput_vs_total_workers.png) -->
+<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/cluster_size_1/throughput_vs_total_workers.png" alt="img"></p>
+<p>显然，与Worker &#x3D; 1相比，worker数量为2时，吞吐量提升了约一倍，达到了实验所需的优化要求。</p>
+<p>节点利用效率随着Worker数量的增加而逐渐下降，可能是由于任务调度与资源分配的开销增加所致。</p>
+<!-- ![img](/lab4/img/cluster_size_1/efficiency_vs_total_workers.png) -->
+<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/cluster_size_1/efficiency_vs_total_workers.png" alt="img"></p>
+<h2 id="六、分布式部署与性能测试"><a href="#六、分布式部署与性能测试" class="headerlink" title="六、分布式部署与性能测试"></a>六、分布式部署与性能测试</h2><h3 id="（一）部署方式"><a href="#（一）部署方式" class="headerlink" title="（一）部署方式"></a>（一）部署方式</h3><p>分布式部署采用多台服务器构建Ray集群。</p>
+<p>目前使用的节点均为USTC vlab平台提供的虚拟机，配置如下：</p>
+<ul>
+<li>每台服务器配置2核CPU，4GB内存，操作系统为Ubuntu 24.04。</li>
+<li>每台服务器安装Ray框架，确保版本一致性。</li>
+<li>多台服务器通过局域网连接，形成Ray集群，实现分布式计算。</li>
+</ul>
+<p>在每台服务器上安装Ray，并配置集群参数以实现节点之间的通信与协作。将一台服务器设置为主节点，负责任务调度与资源管理，其他服务器作为工作节点，承担实际的计算任务。通过合理分配任务，充分发挥各节点的计算能力。</p>
+<p>主节点上，运行以下命令启动Ray服务，并指定主节点IP地址：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ray start --<span class="built_in">head</span> --node-ip-address=主节点IP --port=10001</span><br></pre></td></tr></table></figure>
+
+<p>工作节点上，运行以下命令连接到主节点：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ray start --address=<span class="string">&#x27;ray://主节点IP:10001&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>值得一提的是，在实验初期，我们也曾尝试过使用实体机（我们几个组员的个人电脑）进行分布式部署，但由于网络环境不稳定，加上互联的方式较为复杂，导致部署过程频繁出错，最终决定使用USTC vlab平台提供的虚拟机进行分布式部署。</p>
+<h3 id="（二）性能测试方法"><a href="#（二）性能测试方法" class="headerlink" title="（二）性能测试方法"></a>（二）性能测试方法</h3><p>性能测试延续单机版测试内容，包括任务延迟、吞吐量、资源利用率等指标。此外，重点关注分布式环境下任务在各节点之间的分配情况与数据传输效率。</p>
+<h3 id="（三）测试结果-1"><a href="#（三）测试结果-1" class="headerlink" title="（三）测试结果"></a>（三）测试结果</h3><p>在每台机器上启动同样数目的工作节点，并分配相同数量的任务。通过监控各节点的CPU与内存使用情况，记录平均CPU利用率与内存占用。</p>
+<p>首先，平均CPU利用率随着集群规模的扩大而波动，但总体规律为多台机器协同工作时，CPU利用率较单机低，可能的原因是任务调度、资源分配与节点间通信的开销。</p>
+<!-- ![img](/lab4/img/config_workers_4/avg_cpu_vs_cluster_size.png) -->
+<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_4/avg_cpu_vs_cluster_size.png" alt="img"></p>
+<p>其次，平均内存使用量随着集群规模的扩大而增加，但增长幅度相对平稳，表明Ray在分布式环境下能够较好地管理内存资源，避免过度消耗。<br>(而图片中出现这样的趋势是因为在测集群规模2，3，5前重启了机器，导致内存使用量较低。 应该把1，4，6看成一条线，2，3，5看成另一条线。)</p>
+<!-- ![img](/lab4/img/config_workers_4/avg_memory_vs_cluster_size.png) -->
+<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_4/avg_memory_vs_cluster_size.png" alt="img"></p>
+<p>吞吐量上，随着集群规模的扩大，Ray每秒处理的素数数量显著增加，表明分布式部署能够有效提升计算效率。测试结果显示，在集群规模为5时，吞吐量达到了最高峰。但在集群规模为6时，吞吐量略有下降，可能是由于节点间通信开销增加或任务调度不均衡所致。</p>
+<!-- ![img](/lab4/img/config_workers_2/throughput_vs_cluster_size.png) -->
+<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_2/throughput_vs_cluster_size.png" alt="img"></p>
+<p>效率方面，随着集群规模的扩大，节点利用效率整体呈现明显的下降趋势。并且每个节点的worker数量增加时，下降趋势更加明显。这表明在分布式环境下，Ray的任务调度与资源分配机制可能存在一定的瓶颈，导致节点间的协同效率降低。需要进一步优化任务分配策略，以提升整体计算效率。</p>
+<!-- ![img](/lab4/img/config_workers_1/efficiency_vs_cluster_size.png) -->
+<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_1/efficiency_vs_cluster_size.png" alt="img"></p>
+<!-- ![img](/lab4/img/config_workers_3/efficiency_vs_cluster_size.png) -->
+<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_3/efficiency_vs_cluster_size.png" alt="img"></p>
+<!-- ![img](/lab4/img/config_workers_6/efficiency_vs_cluster_size.png) -->
+<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_6/efficiency_vs_cluster_size.png" alt="img"></p>
+<h2 id="七、基于Docker的分布式部署与性能测试"><a href="#七、基于Docker的分布式部署与性能测试" class="headerlink" title="七、基于Docker的分布式部署与性能测试"></a>七、基于Docker的分布式部署与性能测试</h2><h3 id="（一）Docker部署的优势"><a href="#（一）Docker部署的优势" class="headerlink" title="（一）Docker部署的优势"></a>（一）Docker部署的优势</h3><p>Docker容器化技术为分布式部署提供了诸多便利。它能够将Ray应用及其依赖环境打包成一个独立的容器镜像，确保在不同服务器上的一致性。容器之间相互隔离，避免环境冲突与依赖问题，便于扩展与维护。在分布式部署中，利用Docker可以快速创建与销毁容器，灵活调整计算资源规模。</p>
+<h3 id="（二）Docker部署过程"><a href="#（二）Docker部署过程" class="headerlink" title="（二）Docker部署过程"></a>（二）Docker部署过程</h3><ol>
+<li>构建Docker镜像：编写Dockerfile，指定基础镜像、安装Ray及相关依赖库，并配置运行环境。将应用代码与配置文件添加到镜像中，定义容器启动时执行的命令。</li>
+</ol>
+<p>具体的Dockerfile参见<a target="_blank" rel="noopener" href="https://github.com/OSH-2025/oooooS/blob/main/lab4/docker/Dockerfile">这里</a>。</p>
+<p>启动Docker容器：在每台服务器上，使用Docker命令启动容器。</p>
+<p>构建方法： </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t raytest .</span><br></pre></td></tr></table></figure>
+
+<p>运行方法： </p>
+<p>运行头节点：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name ray-head -p 8000:8000 raytest ray start --<span class="built_in">head</span> --port=8000</span><br></pre></td></tr></table></figure>
+
+<p>运行工作节点：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name ray-worker raytest ray start --address=<span class="string">&quot;xxx.xxx.xx.xx:8000&quot;</span> </span><br></pre></td></tr></table></figure>
+
+<h3 id="（三）测试结果-2"><a href="#（三）测试结果-2" class="headerlink" title="（三）测试结果"></a>（三）测试结果</h3><p>在Docker容器中运行分布式Ray集群，性能测试结果与物理机部署相似，这里就不重复展示了。总体而言，Docker部署的分布式Ray集群在吞吐量、资源利用率与节点效率等较直接部署并无显著的性能损失，反而在部署与管理上提供了更高的灵活性与便利性。</p>
+<h2 id="附：完整代码链接"><a href="#附：完整代码链接" class="headerlink" title="附：完整代码链接"></a>附：完整代码链接</h2><p>这是USTC操作系统课程的一个实验，可以在<a target="_blank" rel="noopener" href="https://github.com/OSH-2025/oooooS/tree/main/lab4">我们小组的页面</a>上获取完整代码。</p>
+
+	
+    <div class="copyright-box">
+		<div class="license-box">
+			<div class="license-header">
+				
+				<div class="license-title">
+					Ray分布式计算框架测试报告
+				</div>
+				<div class="license-subTitle">http://luohaomin.github.io/Luo-Haomin/2025/07/03/Ray分布式计算框架测试报告/index.html</div>
+			</div>
+			<div class="license-meta">
+				
+					<div class="license-meta-item">
+						<div>作者</div>
+						<div>
+							<a href="">
+								luohaomin
+							</a>
+						</div>
+					</div>
+				
+				
+					<div class="license-meta-item license-meta-date">
+					<div>发布于</div>
+					<div>2025年7月3日</div>
+					</div>
+				
+				
+				
+				
+					<div class="license-meta-item">
+					<div>许可协议</div>
+					<div>
+						
+						
+						
+							<a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+								<span class="hint--top hint--rounded" aria-label="BY - 署名">
+									BY - 署名
+								</span>
+							</a>
+						
+						
+					</div>
+					</div>
+				
+			</div>
+		</div>
+	</div>
+
+</div>
+
+
+    
+
+    
+
+    
+        
+        <script async reload>
+            fetch("https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/tokyo-night-dark.css")
+                .then((response) => response.text())
+                .then((cssContent) => {
+                    const style = document.createElement("style");
+                    
+                        cssContent = cssContent
+                            .replace(".hljs-code,", "")
+                            .replaceAll("_", " ")
+                            .replaceAll("hljs-", "hljs .")
+                            .replaceAll(".hljs", " .highlight")
+                            .replaceAll(".built in", ".built_in")
+                            .replaceAll("title.", "");
+                        const figures = document.querySelectorAll("figure.highlight td.gutter");
+                        figures.forEach(figure=>{
+                            figure.classList.add("highlight");
+                        })
+                    
+                    style.innerHTML = cssContent;
+                    document.head.appendChild(style);
+                })
+                .catch((error) => {
+                    console.error("Error loading CSS:", error);
+                });
+        </script>
+    
+
+
+
+
+
+    <script reload>
+        var targets = document.querySelectorAll("figure.highlight, #article-content > pre:not(.highlight,.hljs)");
+        targets.forEach((block) => {
+            const copyBtn = document.createElement("button");
+            copyBtn.innerHTML = `<i class="fa fa-clone" aria-hidden="true"></i>`;
+            copyBtn.className = "code-copy";
+
+            
+                copyBtn.style.color = "#fff";
+            
+
+            copyBtn.addEventListener("click", () => {
+                const text = block.querySelector("td.code")?.textContent || block.querySelector("code")?.textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    copyBtn.innerHTML = "Copied!";
+                    setTimeout(() => {
+                        copyBtn.innerHTML = `<i class="fa fa-clone" aria-hidden="true"></i>`;
+                    }, 2000);
+                });
+            });
+            block.appendChild(copyBtn);
+        });
+    </script>
+
+
+
+
+<div class="post-guide">
+	<div class="item left">
+	
+		<a href="/Luo-Haomin/2025/07/03/Hexo%E4%BD%BF%E7%94%A8%E9%80%9F%E6%9F%A5%E8%A1%A8/">
+			<i class="fa fa-angle-left" aria-hidden="true"></i>
+			Hexo使用速查表
+		</a>
+	
+	</div>
+	<div class="item right">
+		
+	</div>
+</div>
+
+
+
+
+	</div>
+
+	<div id="footer">
+	<div>
+		
+			
+				©2024<span>-</span><span>2025
+			
+			
+			</span>
+			<a href="">
+				luohaomin
+			</a>
+		
+		
+			<span id="busuanzi_container_site_pv">
+				总访问量
+				<span id="vercount_value_page_pv"></span>
+			</span>
+			<span id="busuanzi_container_site_uv">
+				总访客数
+				<span id="vercount_value_site_pv"></span>
+			</span>
+		
+	</div>
+	 <div> Theme <a href="https://github.com/Exisi/hexo-theme-node-tree"	target="_blank">Node-Tree</a> Powered by <a href="https://hexo.io" target="_blank">Hexo</a> </div> 
+</div>
+	<button id="totop-toggle" class="toggle"><i class="fa fa-angle-double-up" aria-hidden="true"></i></button>
+
+<script async>
+    const topTopBtn = document.querySelector("#totop-toggle");
+	topTopBtn.addEventListener("click", () => {
+		window.scrollTo({ top: 0, behavior: "smooth" });
+	});
+</script>
+</body>
+</html>
