@@ -1,203 +1,117 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-
+<html>
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
-	<!-- title -->
-	
-<title>
+  <meta charset="utf-8">
+  
+  
+  <title>Ray分布式计算框架测试报告 | luohaomin&#39;s blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="一、实验背景与目的在大数据与人工智能快速发展的当下，分布式计算框架成为高效处理海量数据与复杂计算任务的关键技术。Ray作为新兴的分布式计算框架，凭借其出色的灵活性与扩展性，在多个领域大放异彩。本次实验聚焦于Ray框架，旨在深入探究其性能表现，掌握部署技巧，并通过优化提升性能。 大素数寻找与分解任务对计算资源要求极高，涉及大量复杂运算。选择该任务作为测试对象，可以充分利用Ray框架的分布式计算优势，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ray分布式计算框架测试报告">
+<meta property="og:url" content="http://luohaomin.github.io/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/index.html">
+<meta property="og:site_name" content="luohaomin&#39;s blog">
+<meta property="og:description" content="一、实验背景与目的在大数据与人工智能快速发展的当下，分布式计算框架成为高效处理海量数据与复杂计算任务的关键技术。Ray作为新兴的分布式计算框架，凭借其出色的灵活性与扩展性，在多个领域大放异彩。本次实验聚焦于Ray框架，旨在深入探究其性能表现，掌握部署技巧，并通过优化提升性能。 大素数寻找与分解任务对计算资源要求极高，涉及大量复杂运算。选择该任务作为测试对象，可以充分利用Ray框架的分布式计算优势，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://luohaomin.github.io/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/cluster_size_1/avg_cpu_vs_total_workers.png">
+<meta property="og:image" content="http://luohaomin.github.io/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/cluster_size_1/avg_memory_vs_total_workers.png">
+<meta property="og:image" content="http://luohaomin.github.io/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/cluster_size_1/throughput_vs_total_workers.png">
+<meta property="og:image" content="http://luohaomin.github.io/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/cluster_size_1/efficiency_vs_total_workers.png">
+<meta property="og:image" content="http://luohaomin.github.io/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_4/avg_cpu_vs_cluster_size.png">
+<meta property="og:image" content="http://luohaomin.github.io/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_4/avg_memory_vs_cluster_size.png">
+<meta property="og:image" content="http://luohaomin.github.io/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_2/throughput_vs_cluster_size.png">
+<meta property="og:image" content="http://luohaomin.github.io/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_1/efficiency_vs_cluster_size.png">
+<meta property="og:image" content="http://luohaomin.github.io/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_3/efficiency_vs_cluster_size.png">
+<meta property="og:image" content="http://luohaomin.github.io/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_6/efficiency_vs_cluster_size.png">
+<meta property="article:published_time" content="2025-07-03T14:17:31.000Z">
+<meta property="article:modified_time" content="2025-07-04T01:10:46.388Z">
+<meta property="article:author" content="luohaomin">
+<meta property="article:tag" content="luohaomin, 生活, 记录">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://luohaomin.github.io/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/cluster_size_1/avg_cpu_vs_total_workers.png">
+  
+    <link rel="alternate" href="/Luo-Haomin/atom.xml" title="luohaomin's blog" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/Luo-Haomin/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/Luo-Haomin/css/style.css">
+
+  
     
-        Ray分布式计算框架测试报告&nbsp;&nbsp;✦&nbsp;
-    
-    luohaomin&#39;s blog
-</title>
+<link rel="stylesheet" href="/Luo-Haomin/fancybox/jquery.fancybox.min.css">
 
-	<!-- keywords,description -->
-	
-
-<meta name="author" content="luohaomin" />
-
-<meta name="keywords" content="luohaomin,生活,记录" />
-
-<meta name="description" content="一、实验背景与目的在大数据与人工智能快速发展的当下，分布式计算框架成为高效处理海量数据与复杂计算任务的关键技术。Ray作为新兴的分布式计算框架，凭借其出色的灵活性与扩展性，在多个领域大放异彩。本次实验聚焦于Ray框架，旨在深入探究其性能表现，掌握部署技巧，并通过优化提升性能。
-大素数寻找与分解任务对计算资源要求极高，涉及大量复杂运算。选择该任务作为测试对象，可以充分利用Ray框架的分布式计算优势，" />
-
-	<!-- favicon -->
-	
-		<link rel="shortcut icon" href="/Luo-Haomin/favicon.ico">
-	
-
-	<!-- css, script -->
-	
-<link rel="stylesheet" href="https://unpkg.com/font-awesome@4.7.0/css/font-awesome.min.css">
-
-	
-<link rel="stylesheet" href="/Luo-Haomin/css/main.css">
-
-
-	
-<script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.58/darkreader.min.js"></script>
-
-	
-<script src="/Luo-Haomin/js/main.js"></script>
-
-
-	<!-- custom css and js -->
-	
-
-
-
-
-
-	<!-- search -->
-	<script async>
-	window.searchEngine = "https://www.google.com/search?q=" ?? "https://www.google.com/search?q=";
-	window.homeHost = "http://luohaomin.github.io/Luo-Haomin" ?? window.location.host;
-</script>
-
-	<!-- statistics -->
-	
-	<script async reload src="https://cn.vercount.one/js"></script>
-
-
-	<!-- analysis -->
-	
-
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
 
 <meta name="generator" content="Hexo 7.3.0"></head>
 
 <body>
-	<header id="header">
-	<a id="title" href="/Luo-Haomin/" class="logo">
-		<img id="logo" src="/Luo-Haomin/favicon-white.ico" alt="logo"/>
-		luohaomin's blog
-	</a>
-
-	<ul id="menu">
-		
-			<li class="menu-item">
-				<a href="/Luo-Haomin/about" class="menu-item-link">关于</a>
-			</li>
-		
-		
-		
-		
-			<li class="menu-item">
-				<a href="https://github.com/LuoHaomin/" class="menu-item-link item-icon" target="_blank">
-					<i class="fa fa-github fa-2x"></i>
-				</a>
-			</li>
-		
-		
-			<li class="menu-item dark-mode">
-				<a href="#" class="menu-item-link item-icon">
-					<i class="fa fa-moon-o fa-2x"></i>
-				</a>
-			</li>
-
-			<script async>
-				const localModel = localStorage.getItem("darkModel");
-				const darkModel = !localModel ? 0 : localModel;
-
-				const darkModeIcon = document.querySelector("#menu .dark-mode i");
-
-				if (darkModel == 1) {
-					darkModeIcon.classList.replace("fa-moon-o", "fa-sun-o");
-					DarkReader.enable({
-						brightness: 100,
-						contrast: 90,
-						sepia: 10,
-					});
-				}
-
-				darkModeIcon.addEventListener("click", () => {
-					const isMoon = darkModeIcon.classList.contains("fa-moon-o");
-					darkModeIcon.classList.toggle("fa-moon-o", !isMoon);
-					darkModeIcon.classList.toggle("fa-sun-o", isMoon);
-					localStorage.setItem("darkModel", isMoon ? 1 : 0);
-					isMoon ? DarkReader.enable({ brightness: 100, contrast: 90, sepia: 10 }) : DarkReader.disable();
-				});
-			</script>
-		
-	</ul>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/Luo-Haomin/" id="logo">luohaomin&#39;s blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/Luo-Haomin/" id="subtitle">一个记录生活的地方</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/Luo-Haomin/">Home</a>
+        
+          <a class="main-nav-link" href="/Luo-Haomin/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/Luo-Haomin/atom.xml" title="RSS 订阅"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="搜索"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://luohaomin.github.io/Luo-Haomin"></form>
+      </div>
+    </div>
+  </div>
 </header>
 
-<script async>
-	let startHeight = 0;
-	window.addEventListener("scroll", () => {
-		const { scrollY: endHeight } = window;
-		const distance = endHeight - startHeight;
-		startHeight = endHeight;
-		document.querySelector("#header").style.display = distance > 0 && endHeight > 50 ? "none" : "";
-	});
-</script>
-	<div id="sidebar">
-	<button id="sidebar-toggle" class="toggle" ><i class="fa fa-arrow-right " aria-hidden="true"></i></button>
-	<div id="site-toc">
-		<input id="search-input" class="search-input" type="search" placeholder="按回车全站搜索">
-		<div id="tree">
-			
-			
-							<ul>
-								<li class="file">
-									<a href="/Luo-Haomin/2025/05/06/%E5%86%99%E5%9C%A8%E5%89%8D%E9%9D%A2/" title="/Luo-Haomin/2025/05/06/写在前面">
-									
-										写在前面
-									
-									</a>
-								</li>
-								<div class="article-toc" style="display: none;"></div>
-							</ul>
-			
-							<ul>
-								<li class="file">
-									<a href="/Luo-Haomin/2025/07/03/Hexo%E4%BD%BF%E7%94%A8%E9%80%9F%E6%9F%A5%E8%A1%A8/" title="/Luo-Haomin/2025/07/03/Hexo使用速查表">
-									
-										Hexo使用速查表
-									
-									</a>
-								</li>
-								<div class="article-toc" style="display: none;"></div>
-							</ul>
-			
-							<ul>
-								<li class="file active">
-									<a href="/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/" title="/Luo-Haomin/2025/07/03/Ray分布式计算框架测试报告">
-									
-										Ray分布式计算框架测试报告
-									
-									</a>
-								</li>
-								<div class="article-toc" style="display: none;"></div>
-							</ul>
-			
-		</div>
-	</div>
-</div>
+      <div class="outer">
+        <section id="main"><article id="post-Ray分布式计算框架测试报告" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/" class="article-date">
+  <time class="dt-published" datetime="2025-07-03T14:17:31.000Z" itemprop="datePublished">2025-07-03</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Ray分布式计算框架测试报告
+    </h1>
+  
 
-	<div id="content">
-		<h1 id="article-title">
-	Ray分布式计算框架测试报告
-</h1>
-
-<div class="article-meta">
-	<span> luohaomin </span>
-	<span> 2025-07-03 22:17:31 </span>
-	<div id="article-categories">
-		
-			<span>Categories：</span>
-			
-		
-		
-			<span>Tags：</span>
-			
-		
-	</div>
-</div>
-
-<div id="article-content">
-	<h2 id="一、实验背景与目的"><a href="#一、实验背景与目的" class="headerlink" title="一、实验背景与目的"></a>一、实验背景与目的</h2><p>在大数据与人工智能快速发展的当下，分布式计算框架成为高效处理海量数据与复杂计算任务的关键技术。Ray作为新兴的分布式计算框架，凭借其出色的灵活性与扩展性，在多个领域大放异彩。本次实验聚焦于Ray框架，旨在深入探究其性能表现，掌握部署技巧，并通过优化提升性能。</p>
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h2 id="一、实验背景与目的"><a href="#一、实验背景与目的" class="headerlink" title="一、实验背景与目的"></a>一、实验背景与目的</h2><p>在大数据与人工智能快速发展的当下，分布式计算框架成为高效处理海量数据与复杂计算任务的关键技术。Ray作为新兴的分布式计算框架，凭借其出色的灵活性与扩展性，在多个领域大放异彩。本次实验聚焦于Ray框架，旨在深入探究其性能表现，掌握部署技巧，并通过优化提升性能。</p>
 <p>大素数寻找与分解任务对计算资源要求极高，涉及大量复杂运算。选择该任务作为测试对象，可以充分利用Ray框架的分布式计算优势，实现任务的高效并行处理，从而显著提升计算效率。</p>
 <h2 id="二、可选性能指标"><a href="#二、可选性能指标" class="headerlink" title="二、可选性能指标"></a>二、可选性能指标</h2><h3 id="（一）核心性能指标"><a href="#（一）核心性能指标" class="headerlink" title="（一）核心性能指标"></a>（一）核心性能指标</h3><ol>
 <li><strong>任务延迟（Task Latency）</strong><ul>
@@ -273,18 +187,22 @@
 <h3 id="（三）测试结果"><a href="#（三）测试结果" class="headerlink" title="（三）测试结果"></a>（三）测试结果</h3><p>在单机版测试中，我们修改单节点的Worker数量,测试得到以下数据。具体测试结果如下：</p>
 <p>CPU利用率随着Worker数量的增加而逐渐上升，但在Worker数量达到一定程度后，CPU利用率趋于平稳。</p>
 <!-- ![img](/lab4/img/cluster_size_1/avg_cpu_vs_total_workers.png) -->
-<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/cluster_size_1/avg_cpu_vs_total_workers.png" alt="img"></p>
+<img src="/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/cluster_size_1/avg_cpu_vs_total_workers.png" class="" title="平均CPU使用率随Worker数量变化">
+
 <p>内存使用量随着Worker数量的增加而逐渐上升。</p>
 <!-- ![img](/lab4/img/cluster_size_1/avg_memory_vs_total_workers.png) -->
-<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/cluster_size_1/avg_memory_vs_total_workers.png" alt="img"></p>
+<img src="/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/cluster_size_1/avg_memory_vs_total_workers.png" class="" title="平均内存使用量随Worker数量变化">
+
 <p>吞吐量随着Worker数量的增加而显著提升，表明Ray框架能够有效利用多核CPU进行并行计算。</p>
 <p>然而，由于我们使用的虚拟机CPU仅为2核，吞吐量在Worker数量达到2时就达到了峰值，之后由于资源竞争与调度开销的增加，吞吐量略有下降。</p>
 <!-- ![img](/lab4/img/cluster_size_1/throughput_vs_total_workers.png) -->
-<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/cluster_size_1/throughput_vs_total_workers.png" alt="img"></p>
+<img src="/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/cluster_size_1/throughput_vs_total_workers.png" class="" title="吞吐量随Worker数量变化">
+
 <p>显然，与Worker &#x3D; 1相比，worker数量为2时，吞吐量提升了约一倍，达到了实验所需的优化要求。</p>
 <p>节点利用效率随着Worker数量的增加而逐渐下降，可能是由于任务调度与资源分配的开销增加所致。</p>
 <!-- ![img](/lab4/img/cluster_size_1/efficiency_vs_total_workers.png) -->
-<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/cluster_size_1/efficiency_vs_total_workers.png" alt="img"></p>
+<img src="/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/cluster_size_1/efficiency_vs_total_workers.png" class="" title="节点利用效率随Worker数量变化">
+
 <h2 id="六、分布式部署与性能测试"><a href="#六、分布式部署与性能测试" class="headerlink" title="六、分布式部署与性能测试"></a>六、分布式部署与性能测试</h2><h3 id="（一）部署方式"><a href="#（一）部署方式" class="headerlink" title="（一）部署方式"></a>（一）部署方式</h3><p>分布式部署采用多台服务器构建Ray集群。</p>
 <p>目前使用的节点均为USTC vlab平台提供的虚拟机，配置如下：</p>
 <ul>
@@ -304,20 +222,26 @@
 <h3 id="（三）测试结果-1"><a href="#（三）测试结果-1" class="headerlink" title="（三）测试结果"></a>（三）测试结果</h3><p>在每台机器上启动同样数目的工作节点，并分配相同数量的任务。通过监控各节点的CPU与内存使用情况，记录平均CPU利用率与内存占用。</p>
 <p>首先，平均CPU利用率随着集群规模的扩大而波动，但总体规律为多台机器协同工作时，CPU利用率较单机低，可能的原因是任务调度、资源分配与节点间通信的开销。</p>
 <!-- ![img](/lab4/img/config_workers_4/avg_cpu_vs_cluster_size.png) -->
-<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_4/avg_cpu_vs_cluster_size.png" alt="img"></p>
+<img src="/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_4/avg_cpu_vs_cluster_size.png" class="" title="平均CPU利用率随集群规模变化">
+
 <p>其次，平均内存使用量随着集群规模的扩大而增加，但增长幅度相对平稳，表明Ray在分布式环境下能够较好地管理内存资源，避免过度消耗。<br>(而图片中出现这样的趋势是因为在测集群规模2，3，5前重启了机器，导致内存使用量较低。 应该把1，4，6看成一条线，2，3，5看成另一条线。)</p>
 <!-- ![img](/lab4/img/config_workers_4/avg_memory_vs_cluster_size.png) -->
-<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_4/avg_memory_vs_cluster_size.png" alt="img"></p>
+<img src="/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_4/avg_memory_vs_cluster_size.png" class="" title="平均内存使用量随集群规模变化">
+
 <p>吞吐量上，随着集群规模的扩大，Ray每秒处理的素数数量显著增加，表明分布式部署能够有效提升计算效率。测试结果显示，在集群规模为5时，吞吐量达到了最高峰。但在集群规模为6时，吞吐量略有下降，可能是由于节点间通信开销增加或任务调度不均衡所致。</p>
 <!-- ![img](/lab4/img/config_workers_2/throughput_vs_cluster_size.png) -->
-<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_2/throughput_vs_cluster_size.png" alt="img"></p>
+<img src="/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_2/throughput_vs_cluster_size.png" class="" title="吞吐量随集群规模变化">
+
 <p>效率方面，随着集群规模的扩大，节点利用效率整体呈现明显的下降趋势。并且每个节点的worker数量增加时，下降趋势更加明显。这表明在分布式环境下，Ray的任务调度与资源分配机制可能存在一定的瓶颈，导致节点间的协同效率降低。需要进一步优化任务分配策略，以提升整体计算效率。</p>
 <!-- ![img](/lab4/img/config_workers_1/efficiency_vs_cluster_size.png) -->
-<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_1/efficiency_vs_cluster_size.png" alt="img"></p>
+<img src="/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_1/efficiency_vs_cluster_size.png" class="" title="节点利用效率随集群规模变化(Worker配置1)">
+
 <!-- ![img](/lab4/img/config_workers_3/efficiency_vs_cluster_size.png) -->
-<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_3/efficiency_vs_cluster_size.png" alt="img"></p>
+<img src="/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_3/efficiency_vs_cluster_size.png" class="" title="节点利用效率随集群规模变化(Worker配置3)">
+
 <!-- ![img](/lab4/img/config_workers_6/efficiency_vs_cluster_size.png) -->
-<p><img src="/Luo-Haomin/source/_posts/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_6/efficiency_vs_cluster_size.png" alt="img"></p>
+<img src="/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/config_workers_6/efficiency_vs_cluster_size.png" class="" title="节点利用效率随集群规模变化(Worker配置6)">
+
 <h2 id="七、基于Docker的分布式部署与性能测试"><a href="#七、基于Docker的分布式部署与性能测试" class="headerlink" title="七、基于Docker的分布式部署与性能测试"></a>七、基于Docker的分布式部署与性能测试</h2><h3 id="（一）Docker部署的优势"><a href="#（一）Docker部署的优势" class="headerlink" title="（一）Docker部署的优势"></a>（一）Docker部署的优势</h3><p>Docker容器化技术为分布式部署提供了诸多便利。它能够将Ray应用及其依赖环境打包成一个独立的容器镜像，确保在不同服务器上的一致性。容器之间相互隔离，避免环境冲突与依赖问题，便于扩展与维护。在分布式部署中，利用Docker可以快速创建与销毁容器，灵活调整计算资源规模。</p>
 <h3 id="（二）Docker部署过程"><a href="#（二）Docker部署过程" class="headerlink" title="（二）Docker部署过程"></a>（二）Docker部署过程</h3><ol>
 <li>构建Docker镜像：编写Dockerfile，指定基础镜像、安装Ray及相关依赖库，并配置运行环境。将应用代码与配置文件添加到镜像中，定义容器启动时执行的命令。</li>
@@ -337,174 +261,138 @@
 <h3 id="（三）测试结果-2"><a href="#（三）测试结果-2" class="headerlink" title="（三）测试结果"></a>（三）测试结果</h3><p>在Docker容器中运行分布式Ray集群，性能测试结果与物理机部署相似，这里就不重复展示了。总体而言，Docker部署的分布式Ray集群在吞吐量、资源利用率与节点效率等较直接部署并无显著的性能损失，反而在部署与管理上提供了更高的灵活性与便利性。</p>
 <h2 id="附：完整代码链接"><a href="#附：完整代码链接" class="headerlink" title="附：完整代码链接"></a>附：完整代码链接</h2><p>这是USTC操作系统课程的一个实验，可以在<a target="_blank" rel="noopener" href="https://github.com/OSH-2025/oooooS/tree/main/lab4">我们小组的页面</a>上获取完整代码。</p>
 
-	
-    <div class="copyright-box">
-		<div class="license-box">
-			<div class="license-header">
-				
-				<div class="license-title">
-					Ray分布式计算框架测试报告
-				</div>
-				<div class="license-subTitle">http://luohaomin.github.io/Luo-Haomin/2025/07/03/Ray分布式计算框架测试报告/index.html</div>
-			</div>
-			<div class="license-meta">
-				
-					<div class="license-meta-item">
-						<div>作者</div>
-						<div>
-							<a href="">
-								luohaomin
-							</a>
-						</div>
-					</div>
-				
-				
-					<div class="license-meta-item license-meta-date">
-					<div>发布于</div>
-					<div>2025年7月3日</div>
-					</div>
-				
-				
-				
-				
-					<div class="license-meta-item">
-					<div>许可协议</div>
-					<div>
-						
-						
-						
-							<a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
-								<span class="hint--top hint--rounded" aria-label="BY - 署名">
-									BY - 署名
-								</span>
-							</a>
-						
-						
-					</div>
-					</div>
-				
-			</div>
-		</div>
-	</div>
-
-</div>
-
-
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://luohaomin.github.io/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/" data-id="cmco4ccoa00049jnn1zpm7u68" data-title="Ray分布式计算框架测试报告" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
     
+<nav id="article-nav">
+  
+  
+    <a href="/Luo-Haomin/2025/07/03/Hexo%E4%BD%BF%E7%94%A8%E9%80%9F%E6%9F%A5%E8%A1%A8/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">后一篇</strong>
+      <div class="article-nav-title">Hexo使用速查表</div>
+    </a>
+  
+</nav>
 
-    
+  
+</article>
 
-    
+
+</section>
         
-        <script async reload>
-            fetch("https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/tokyo-night-dark.css")
-                .then((response) => response.text())
-                .then((cssContent) => {
-                    const style = document.createElement("style");
-                    
-                        cssContent = cssContent
-                            .replace(".hljs-code,", "")
-                            .replaceAll("_", " ")
-                            .replaceAll("hljs-", "hljs .")
-                            .replaceAll(".hljs", " .highlight")
-                            .replaceAll(".built in", ".built_in")
-                            .replaceAll("title.", "");
-                        const figures = document.querySelectorAll("figure.highlight td.gutter");
-                        figures.forEach(figure=>{
-                            figure.classList.add("highlight");
-                        })
-                    
-                    style.innerHTML = cssContent;
-                    document.head.appendChild(style);
-                })
-                .catch((error) => {
-                    console.error("Error loading CSS:", error);
-                });
-        </script>
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/Luo-Haomin/categories/%E5%BA%8F%E8%A8%80/">序言</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/Luo-Haomin/tags/%E5%BA%8F%E8%A8%80/" rel="tag">序言</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/Luo-Haomin/tags/%E5%BA%8F%E8%A8%80/" style="font-size: 10px;">序言</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/Luo-Haomin/archives/2025/07/">七月 2025</a></li><li class="archive-list-item"><a class="archive-list-link" href="/Luo-Haomin/archives/2025/05/">五月 2025</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/Luo-Haomin/2025/07/03/Ray%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97%E6%A1%86%E6%9E%B6%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A/">Ray分布式计算框架测试报告</a>
+          </li>
+        
+          <li>
+            <a href="/Luo-Haomin/2025/07/03/Hexo%E4%BD%BF%E7%94%A8%E9%80%9F%E6%9F%A5%E8%A1%A8/">Hexo使用速查表</a>
+          </li>
+        
+          <li>
+            <a href="/Luo-Haomin/2025/05/06/%E5%86%99%E5%9C%A8%E5%89%8D%E9%9D%A2/">写在前面</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 luohaomin<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/Luo-Haomin/" class="mobile-nav-link">Home</a>
+  
+    <a href="/Luo-Haomin/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
     
 
 
+<script src="/Luo-Haomin/js/jquery-3.6.4.min.js"></script>
 
 
 
-    <script reload>
-        var targets = document.querySelectorAll("figure.highlight, #article-content > pre:not(.highlight,.hljs)");
-        targets.forEach((block) => {
-            const copyBtn = document.createElement("button");
-            copyBtn.innerHTML = `<i class="fa fa-clone" aria-hidden="true"></i>`;
-            copyBtn.className = "code-copy";
-
-            
-                copyBtn.style.color = "#fff";
-            
-
-            copyBtn.addEventListener("click", () => {
-                const text = block.querySelector("td.code")?.textContent || block.querySelector("code")?.textContent;
-                navigator.clipboard.writeText(text).then(() => {
-                    copyBtn.innerHTML = "Copied!";
-                    setTimeout(() => {
-                        copyBtn.innerHTML = `<i class="fa fa-clone" aria-hidden="true"></i>`;
-                    }, 2000);
-                });
-            });
-            block.appendChild(copyBtn);
-        });
-    </script>
+  
+<script src="/Luo-Haomin/fancybox/jquery.fancybox.min.js"></script>
 
 
 
 
-<div class="post-guide">
-	<div class="item left">
-	
-		<a href="/Luo-Haomin/2025/07/03/Hexo%E4%BD%BF%E7%94%A8%E9%80%9F%E6%9F%A5%E8%A1%A8/">
-			<i class="fa fa-angle-left" aria-hidden="true"></i>
-			Hexo使用速查表
-		</a>
-	
-	</div>
-	<div class="item right">
-		
-	</div>
-</div>
+<script src="/Luo-Haomin/js/script.js"></script>
 
 
 
 
-	</div>
 
-	<div id="footer">
-	<div>
-		
-			
-				©2024<span>-</span><span>2025
-			
-			
-			</span>
-			<a href="">
-				luohaomin
-			</a>
-		
-		
-			<span id="busuanzi_container_site_pv">
-				总访问量
-				<span id="vercount_value_page_pv"></span>
-			</span>
-			<span id="busuanzi_container_site_uv">
-				总访客数
-				<span id="vercount_value_site_pv"></span>
-			</span>
-		
-	</div>
-	 <div> Theme <a href="https://github.com/Exisi/hexo-theme-node-tree"	target="_blank">Node-Tree</a> Powered by <a href="https://hexo.io" target="_blank">Hexo</a> </div> 
-</div>
-	<button id="totop-toggle" class="toggle"><i class="fa fa-angle-double-up" aria-hidden="true"></i></button>
-
-<script async>
-    const topTopBtn = document.querySelector("#totop-toggle");
-	topTopBtn.addEventListener("click", () => {
-		window.scrollTo({ top: 0, behavior: "smooth" });
-	});
-</script>
+  </div>
 </body>
 </html>
